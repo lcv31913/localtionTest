@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>吃什麼啦</title>
+</head>
+
+<style>
+        /* 將文本置中對齊 */
+        body {
+            text-align: center;
+        }
+
+        /* 設定按鈕樣式 */
+        #getLocationButton {
+            font-size: 24px; /* 設定按鈕文字大小 */
+            padding: 10px 20px; /* 設定按鈕內邊距，增加按鈕大小 */
+        }
+        
+        /* 可選：將段落文字置中 */
+        #location {
+            text-align: center;
+			font-size: 24px;
+        }
+		
+		#location-text {
+			text-align: left; /* 將內容文字靠左對齊 */
+		}
+</style>
+	
+<body>
+    <h1>吃什麼啦</h1>
+    <button id="getLocationButton">抽籤!</button>
+    <p id="location"></p>
+
+    <script>
+		function getRandomInt(min, max) {
+			return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		
+        document.getElementById('getLocationButton').addEventListener('click', function() {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    
+                    var locationInfo = {
+                        latitude: latitude,
+                        longitude: longitude
+                    };
+
+                    fetch('/get_location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ geolocation: locationInfo })
+                    })
+                    .then(response => response.json())
+                    .then(data => {						
+						var index = getRandomInt(0, data.length);
+						var str = "店名: " + data[index].name + "</br>" + "地址: " + data[index].address + "</br>" + "評分: " + data[index].rating;
+                        document.getElementById('location').innerHTML = str;
+                    })
+                    .catch(error => {
+                        console.error('錯誤:', error);
+                    });
+                });
+            } else {
+                alert('瀏覽器不支援地理位置功能');
+            }
+        });
+    </script>
+</body>
+</html>
